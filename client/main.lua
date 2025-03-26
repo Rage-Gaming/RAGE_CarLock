@@ -18,23 +18,18 @@ exports("AddKey", AddKey);
 exports("RemoveKey", RemoveKey);
 
 
-RegisterNetEvent('dm-carlock:client:setLockState')
-AddEventHandler('dm-carlock:client:setLockState', function(netId, state)
+RegisterNetEvent('RAGE_Carlock:client:setLockState')
+AddEventHandler('RAGE_Carlock:client:setLockState', function(netId, state)
     local vehicle = NetToVeh(netId)
     if DoesEntityExist(vehicle) then
         SetVehicleDoorsLocked(vehicle, state)
         SetVehicleDoorsLockedForAllPlayers(vehicle, state == 2)
-        SetVehicleLights(vehicle, 2)
-        Citizen.Wait(250)
-        SetVehicleLights(vehicle, 0)
-        StartVehicleHorn(vehicle, 500, "NORMAL", -1)
-        PlaySoundFrontend(-1, 'Hack_Success', 'DLC_HEIST_BIOLAB_PREP_HACKING_SOUNDS', 0)
     end
 end)
 
 
-RegisterNetEvent('dm-carlock:client:notify')
-AddEventHandler('dm-carlock:client:notify', function(state, plate)
+RegisterNetEvent('RAGE_Carlock:client:notify')
+AddEventHandler('RAGE_Carlock:client:notify', function(state, plate)
     if state == 2 then
         lib.notify({title = 'Vehicle', description = 'Locked '..plate, type = 'error'})
     else
@@ -54,7 +49,7 @@ function ToggleVehicleLock()
     local netId = VehToNet(vehicle)
 
     if vehicleTable[plate] == nil then
-        ESX.TriggerServerCallback('dm-carlock:requestPlayerCars', function(isOwner)
+        ESX.TriggerServerCallback('RAGE_Carlock:requestPlayerCars', function(isOwner)
             if isOwner then
                 isOwned = isOwner
                 AddKey(plate)
@@ -68,7 +63,12 @@ function ToggleVehicleLock()
     end
     if isOwned or (vehicleTable[plate] ~= nil and vehicleTable[plate].haskey) then
         lockAnimation()
-        TriggerServerEvent('dm-carlock:server:toggleLock', netId, plate)
+        TriggerServerEvent('RAGE_Carlock:server:toggleLock', netId, plate)
+        SetVehicleLights(vehicle, 2)
+        Citizen.Wait(250)
+        SetVehicleLights(vehicle, 0)
+        StartVehicleHorn(vehicle, 500, "NORMAL", -1)
+        PlaySoundFrontend(-1, 'Hack_Success', 'DLC_HEIST_BIOLAB_PREP_HACKING_SOUNDS', 0)
     else
         lib.notify({title = 'Vehicle', description = 'No keys for '..plate, type = 'error'})
     end
